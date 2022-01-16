@@ -1,0 +1,17 @@
+body {
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#redorblack {
+  background-color: black;
+}
+
+#choices, #replay {
+  display: none;
+}
+
+button {
+  font-size: 2em;
+  padding: 0.5em;
+  margin: 0.5em;
+}
