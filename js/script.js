@@ -10,7 +10,8 @@ let replay = document.getElementById('replay');
 let gamestart = 14.48;
 
 let stops = {
-  '0': 18.22,
+  'rules': 18.22,
+  'gamestart': 18.22,
   'R': 26.87,
   'RR': 38.88,
   'RB': 73.03,
@@ -47,80 +48,50 @@ let endings = {
   'BBB': 160.92,
 };
 
+let startTime = {
+  rules: 0,
+  gamestart,
+  ...tree,
+};
+
+let currentNode = undefined;
+let pauseAfter = undefined;
+
+const playNode = newNode => {
+  currentNode = newNode;
+  console.debug(startTime[currentNode], tree[currentNode]);
+  video.currentTime = startTime[currentNode];
+  pauseAfter = stops[currentNode] || endings[currentNode];
+  video.play();
+};
+
 play.addEventListener('click', () => {
-  video.play();
   play.style.display = 'none';
+  playNode('rules');
 });
 
-red.addEventListener('click', () => {
+const choose = chosen => {
   choices.style.display = 'none';
-  if(video.currentTime >= stops['0'] && video.currentTime <= stops['0'] + 1) {
-    video.currentTime = tree['R'];
-  }
-  if(video.currentTime >= stops['R'] && video.currentTime <= stops['R'] + 1) {
-    video.currentTime = tree['RR'];
-  }
-  if(video.currentTime >= stops['RR'] && video.currentTime <= stops['RR'] + 1) {
-    video.currentTime = tree['RRR'];
-  }
-  if(video.currentTime >= stops['RB'] && video.currentTime <= stops['RB'] + 1) {
-    video.currentTime = tree['RBR'];
-  }
-  if(video.currentTime >= stops['B'] && video.currentTime <= stops['B'] + 1) {
-    video.currentTime = tree['BR'];
-  }
-  if(video.currentTime >= stops['BR'] && video.currentTime <= stops['BR'] + 1) {
-    video.currentTime = tree['BRR'];
-  }
-  if(video.currentTime >= stops['BB'] && video.currentTime <= stops['BB'] + 1) {
-    video.currentTime = tree['BBR'];
-  }
-  video.play();
-});
+  const prefix = (tree[currentNode] ? currentNode : "");
+  playNode(prefix + chosen);
+};
 
-black.addEventListener('click', () => {
-  choices.style.display = 'none';
-  if(video.currentTime >= stops['0'] && video.currentTime <= stops['0'] + 1) {
-    video.currentTime = tree['B'];
-  }
-  if(video.currentTime >= stops['R'] && video.currentTime <= stops['R'] + 1) {
-    video.currentTime = tree['RB'];
-  }
-  if(video.currentTime >= stops['RR'] && video.currentTime <= stops['RR'] + 1) {
-    video.currentTime = tree['RRB'];
-  }
-  if(video.currentTime >= stops['RB'] && video.currentTime <= stops['RB'] + 1) {
-    video.currentTime = tree['RBB'];
-  }
-  if(video.currentTime >= stops['B'] && video.currentTime <= stops['B'] + 1) {
-    video.currentTime = tree['BB'];
-  }
-  if(video.currentTime >= stops['BR'] && video.currentTime <= stops['BR'] + 1) {
-    video.currentTime = tree['BRB'];
-  }
-  if(video.currentTime >= stops['BB'] && video.currentTime <= stops['BB'] + 1) {
-    video.currentTime = tree['BBB'];
-  }
-  video.play();
-});
+red.addEventListener('click', () => choose('R'));
+black.addEventListener('click', () => choose('B'));
 
 video.addEventListener('timeupdate', (event) => {
-  for (const key in stops) {
-    if(video.currentTime >= stops[key] && video.currentTime <= stops[key] + 1) {
-      video.pause();
-      choices.style.display = 'block';
-    }
-  }
-  for (const key in endings) {
-    if(video.currentTime >= endings[key] && video.currentTime <= endings[key] + 1) {
-      video.pause();
-      replay.style.display = 'block';
-    }
+  if (video.currentTime < pauseAfter) return;
+
+  video.pause();
+
+  if (endings[currentNode]) {
+    replay.style.display = 'block';
+  } else {
+    choices.style.display = 'block';
   }
 });
 
 replay.addEventListener('click', () => {
   replay.style.display = 'none';
-  video.currentTime = gamestart;
-  video.play();
+  playNode('gamestart');
 });
